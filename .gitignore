@@ -30,6 +30,12 @@ ipch
 ## Getting files created in JSON/Schemas/Catalog/ from a VS2022 update
 JSON/
 
+# dear_bindings
+**/__pycache__/
+generated
+*.json
+venv
+
 ## Commonly used CMake directories & CMake CPM cache
 build*/
 .cache
