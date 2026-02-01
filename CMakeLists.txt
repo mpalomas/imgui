@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
-project(imgui VERSION 1.92.6 LANGUAGES CXX C)
+
+# Enable Objective-C on Apple platforms (required for Dawn WebGPU)
+if(APPLE)
+    project(imgui VERSION 1.92.6 LANGUAGES CXX C OBJC OBJCXX)
+else()
+    project(imgui VERSION 1.92.6 LANGUAGES CXX C)
+endif()
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -204,10 +210,28 @@ if(IMGUI_BUILD_BACKEND_WGPU)
     add_library(imgui_backend_wgpu ${IMGUI_LIB_TYPE} ${IMGUI_WGPU_SOURCES} ${IMGUI_WGPU_HEADERS})
     add_library(imgui::backend_wgpu ALIAS imgui_backend_wgpu)
 
+    # On macOS, compile .cpp files as Objective-C++ since they include Cocoa headers
+    if(APPLE)
+        set_source_files_properties(
+            ${CMAKE_CURRENT_SOURCE_DIR}/backends/imgui_impl_wgpu.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/backends/dcimgui_impl_wgpu.cpp
+            PROPERTIES LANGUAGE OBJCXX
+        )
+    endif()
+
     target_link_libraries(imgui_backend_wgpu
         PUBLIC imgui
         PUBLIC webgpu_dawn::webgpu_dawn
     )
+
+    if(APPLE)
+        target_link_libraries(imgui_backend_wgpu PRIVATE
+            "-framework Cocoa"
+            "-framework IOKit"
+            "-framework CoreFoundation"
+            "-framework QuartzCore"
+        )
+    endif()
 
     target_include_directories(imgui_backend_wgpu
         PUBLIC
