@@ -8,15 +8,11 @@ set(_IMGUI_BUILD_BACKEND_SDL3_RENDERER @IMGUI_BUILD_BACKEND_SDL3_RENDERER@)
 set(_IMGUI_BUILD_BACKEND_VULKAN @IMGUI_BUILD_BACKEND_VULKAN@)
 set(_IMGUI_BUILD_BACKEND_WGPU @IMGUI_BUILD_BACKEND_WGPU@)
 
-set(_IMGUI_SDL3_DIR "@SDL3_DIR@")
-set(_IMGUI_WEBGPU_DAWN_DIR "@WEBGPU_DAWN_DIR@")
+# Consumer can set these variables before find_package(imgui) to specify dependency locations
+# e.g., set(SDL3_DIR "/path/to/SDL3") before find_package(imgui)
 
 if(_IMGUI_BUILD_BACKEND_SDL3 OR _IMGUI_BUILD_BACKEND_SDL3_RENDERER)
-    if(_IMGUI_SDL3_DIR)
-        find_dependency(SDL3 CONFIG PATHS "${_IMGUI_SDL3_DIR}" NO_DEFAULT_PATH)
-    else()
-        find_dependency(SDL3 CONFIG)
-    endif()
+    find_dependency(SDL3 CONFIG)
 endif()
 
 if(_IMGUI_BUILD_BACKEND_VULKAN)
@@ -24,11 +20,7 @@ if(_IMGUI_BUILD_BACKEND_VULKAN)
 endif()
 
 if(_IMGUI_BUILD_BACKEND_WGPU)
-    if(_IMGUI_WEBGPU_DAWN_DIR)
-        find_dependency(webgpu CONFIG PATHS "${_IMGUI_WEBGPU_DAWN_DIR}" NO_DEFAULT_PATH)
-    else()
-        find_dependency(webgpu CONFIG)
-    endif()
+    find_dependency(webgpu_dawn CONFIG)
 endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/imguiTargets.cmake")

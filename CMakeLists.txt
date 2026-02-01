@@ -61,11 +61,12 @@ target_include_directories(imgui
 
 # Export symbols for shared library
 if(IMGUI_BUILD_SHARED)
-    target_compile_definitions(imgui
-        PRIVATE IMGUI_API=__declspec\(dllexport\)
-        INTERFACE IMGUI_API=__declspec\(dllimport\)
-    )
-    if(NOT WIN32)
+    if(WIN32)
+        target_compile_definitions(imgui
+            PRIVATE IMGUI_API=__declspec\(dllexport\)
+            INTERFACE IMGUI_API=__declspec\(dllimport\)
+        )
+    else()
         target_compile_definitions(imgui
             PRIVATE IMGUI_API=__attribute__\(\(visibility\(\"default\"\)\)\)
             INTERFACE IMGUI_API=
@@ -188,7 +189,7 @@ if(IMGUI_BUILD_BACKEND_WGPU)
         message(FATAL_ERROR "WEBGPU_DAWN_DIR must be set when IMGUI_BUILD_BACKEND_WGPU is ON")
     endif()
 
-    find_package(webgpu REQUIRED CONFIG PATHS ${WEBGPU_DAWN_DIR} NO_DEFAULT_PATH)
+    find_package(webgpu_dawn REQUIRED CONFIG PATHS ${WEBGPU_DAWN_DIR} NO_DEFAULT_PATH)
 
     set(IMGUI_WGPU_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/backends/imgui_impl_wgpu.cpp
@@ -205,13 +206,17 @@ if(IMGUI_BUILD_BACKEND_WGPU)
 
     target_link_libraries(imgui_backend_wgpu
         PUBLIC imgui
-        PUBLIC webgpu
+        PUBLIC webgpu_dawn::webgpu_dawn
     )
 
     target_include_directories(imgui_backend_wgpu
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/backends>
             $<INSTALL_INTERFACE:include>
+    )
+
+    target_compile_definitions(imgui_backend_wgpu
+        PUBLIC IMGUI_IMPL_WEBGPU_BACKEND_DAWN
     )
 endif()
 
