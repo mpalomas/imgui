@@ -85,11 +85,12 @@ endif()
 # =============================================================================
 
 if(IMGUI_BUILD_BACKEND_SDL3)
-    if(NOT SDL3_DIR)
-        message(FATAL_ERROR "SDL3_DIR must be set when IMGUI_BUILD_BACKEND_SDL3 is ON")
+    if(NOT TARGET SDL3::SDL3)
+        if(NOT SDL3_DIR)
+            message(FATAL_ERROR "SDL3_DIR must be set when IMGUI_BUILD_BACKEND_SDL3 is ON")
+        endif()
+        find_package(SDL3 REQUIRED CONFIG PATHS ${SDL3_DIR} NO_DEFAULT_PATH)
     endif()
-
-    find_package(SDL3 REQUIRED CONFIG PATHS ${SDL3_DIR} NO_DEFAULT_PATH)
 
     set(IMGUI_SDL3_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp
@@ -245,8 +246,12 @@ if(IMGUI_BUILD_BACKEND_WGPU)
 endif()
 
 # =============================================================================
-# Installation
+# Installation (skip when consumed via add_subdirectory/FetchContent)
 # =============================================================================
+
+if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    return()
+endif()
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
